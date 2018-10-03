@@ -3,6 +3,9 @@
 
 import time
 import csv
+import sys
+
+hasCanceled = False
 
 def type_to_min(type):
     # type => min
@@ -16,19 +19,48 @@ def type_to_min(type):
         min = 0
     return min
 
+def handle_input_cmd(cmd):
+    if cmd.lower() == 'c' or cmd.lower() == 'cancel':
+        global hasCanceled
+        hasCanceled = True
+    elif cmd.lower() == 'r' or cmd.lower() == 'resume':
+        # 何もせずに処理を再開
+        return
+    elif cmd.lower() == 'e' or cmd.lower() == 'exit':
+        sys.exit()
+    else:
+        return
+
+def sec_to_mmss(sec):
+    disp_min, disp_sec = divmod(sec, 60)
+    return f'{str(disp_min).zfill(2)}:{str(disp_sec).zfill(2)}'
+
 def countdown(min):
+    # min(秒)カウントダウン
     sec = min * 60
     start = time.strftime("%Y-%m-%d %H:%M:%S")
-    print(f"start;{start}")
-    print(f'remain is {sec}sec.')
+    print(f"start at {start}")
+    print(sec_to_mmss(sec))
+
     while sec > 0:
-        time.sleep(1)
-        sec -= 1
-        disp_min, disp_sec = divmod(sec, 60)
-        print(f'remain is {disp_min}:{disp_sec}') # TODO 2ゼロ埋め
+        try:
+            time.sleep(1)
+            sec -= 1
+            print(sec_to_mmss(sec))
+        except KeyboardInterrupt:
+            cmd = input('Input.\n  - cancel\n  - resume\n  - exit\n=> ')
+            handle_input_cmd(cmd)
+
+            global hasCanceled
+            if hasCanceled == True:
+                hasCanceled = False
+                break
+
     end = time.strftime("%Y-%m-%d %H:%M:%S")
-    print(f"end;{end}")
-    # カウントダウン完了時に通知する
+    print(f"end at {end}")
+
+    # カウントダウン完了時に通知する TODO
+
     # 開始時刻、終了時刻をファイルに記録
     save_pomo_log(start, end)
 
@@ -39,9 +71,8 @@ def save_pomo_log(start, end):
     logWriter.writerow([start, end])
     logFile.close()
 
-# 標準入力トリガで動かす
-#min = int(input('countdown min -> '))
-type = input('work or break -> ')
-min = type_to_min(type)
-countdown(min)
+while True:
+    type = input('work or break -> ')
+    min = type_to_min(type)
+    countdown(min)
 
