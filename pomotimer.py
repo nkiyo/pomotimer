@@ -7,6 +7,21 @@ import sys
 
 hasCanceled = False
 
+class pycolor:
+    BLACK = '\033[30m'
+    RED = '\033[31m'
+    GREEN = '\033[32m'
+    YELLOW = '\033[33m'
+    BLUE = '\033[34m'
+    PURPLE = '\033[35m'
+    CYAN = '\033[36m'
+    WHITE = '\033[37m'
+    END = '\033[0m'
+    BOLD = '\038[1m'
+    UNDERLINE = '\033[4m'
+    INVISIBLE = '\033[08m'
+    REVERCE = '\033[07m'
+
 def type_to_min(type):
     # type => min
     if type.lower() == 'w' or type.lower() == 'work':
@@ -39,14 +54,14 @@ def countdown(min):
     # min(秒)カウントダウン
     sec = min * 60
     start = time.strftime("%Y-%m-%d %H:%M:%S")
-    print(f"start at {start}")
-    print(sec_to_mmss(sec))
+    print(f"{pycolor.GREEN}start at {start}{pycolor.END}")
+    print(sec_to_mmss(sec), end = "\r")
 
     while sec > 0:
         try:
             time.sleep(1)
             sec -= 1
-            print(sec_to_mmss(sec))
+            print(sec_to_mmss(sec), end = "\r")
         except KeyboardInterrupt:
             cmd = input('Input.\n  - cancel\n  - resume\n  - exit\n=> ')
             handle_input_cmd(cmd)
@@ -57,16 +72,16 @@ def countdown(min):
                 break
 
     end = time.strftime("%Y-%m-%d %H:%M:%S")
-    print(f"end at {end}")
+    print(f"{pycolor.RED}end at {end}{pycolor.END}")
 
-    # カウントダウン完了時に通知する TODO
+    # カウントダウン完了時に派手に通知する TODO
 
     # 開始時刻、終了時刻をファイルに記録
     save_pomo_log(start, end)
 
 def save_pomo_log(start, end):
     todayStr = time.strftime("%Y-%m-%d")
-    logFile = open(f'{todayStr}_pomo.csv', 'w', newline = '')
+    logFile = open(f'{todayStr}_pomo.csv', 'a', newline = '')
     logWriter = csv.writer(logFile)
     logWriter.writerow([start, end])
     logFile.close()
